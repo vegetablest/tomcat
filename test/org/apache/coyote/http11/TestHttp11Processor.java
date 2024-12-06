@@ -166,7 +166,7 @@ public class TestHttp11Processor extends TomcatBaseTest {
 
         String request = "POST /echo-params.jsp HTTP/1.1" + SimpleHttpClient.CRLF + "Host: any" +
                 SimpleHttpClient.CRLF + "Transfer-encoding: void" + SimpleHttpClient.CRLF + "Content-Length: 9" +
-                SimpleHttpClient.CRLF + "Content-Type: application/x-www-form-urlencoded" + SimpleHttpClient.CRLF +
+                SimpleHttpClient.CRLF + SimpleHttpClient.HTTP_HEADER_CONTENT_TYPE_FORM_URL_ENCODING +
                 SimpleHttpClient.CRLF + "test=data";
 
         Client client = new Client(getPort());
@@ -184,7 +184,7 @@ public class TestHttp11Processor extends TomcatBaseTest {
 
         String request = "POST /echo-params.jsp HTTP/1.1" + SimpleHttpClient.CRLF + "Host: any" +
                 SimpleHttpClient.CRLF + "Transfer-encoding: buffered" + SimpleHttpClient.CRLF + "Content-Length: 9" +
-                SimpleHttpClient.CRLF + "Content-Type: application/x-www-form-urlencoded" + SimpleHttpClient.CRLF +
+                SimpleHttpClient.CRLF + SimpleHttpClient.HTTP_HEADER_CONTENT_TYPE_FORM_URL_ENCODING +
                 SimpleHttpClient.CRLF + "test=data";
 
         Client client = new Client(getPort());
@@ -216,7 +216,7 @@ public class TestHttp11Processor extends TomcatBaseTest {
         String request = "POST /test/echo-params.jsp HTTP/1.1" + SimpleHttpClient.CRLF + "Host: any" +
                 SimpleHttpClient.CRLF + (withCL ? "Content-length: 1" + SimpleHttpClient.CRLF : "") +
                 "Transfer-encoding: chunked" + SimpleHttpClient.CRLF +
-                "Content-Type: application/x-www-form-urlencoded" + SimpleHttpClient.CRLF + "Connection: close" +
+                SimpleHttpClient.HTTP_HEADER_CONTENT_TYPE_FORM_URL_ENCODING + "Connection: close" +
                 SimpleHttpClient.CRLF + SimpleHttpClient.CRLF + "9" + SimpleHttpClient.CRLF + "test=data" +
                 SimpleHttpClient.CRLF + "0" + SimpleHttpClient.CRLF + SimpleHttpClient.CRLF;
 
@@ -236,8 +236,8 @@ public class TestHttp11Processor extends TomcatBaseTest {
 
         String request = "POST /echo-params.jsp HTTP/1.1" + SimpleHttpClient.CRLF + "Host: any" +
                 SimpleHttpClient.CRLF + "Transfer-encoding: savedrequest" + SimpleHttpClient.CRLF +
-                "Content-Length: 9" + SimpleHttpClient.CRLF + "Content-Type: application/x-www-form-urlencoded" +
-                SimpleHttpClient.CRLF + SimpleHttpClient.CRLF + "test=data";
+                "Content-Length: 9" + SimpleHttpClient.CRLF +
+                SimpleHttpClient.HTTP_HEADER_CONTENT_TYPE_FORM_URL_ENCODING + SimpleHttpClient.CRLF + "test=data";
 
         Client client = new Client(getPort());
         client.setRequest(new String[] { request });
@@ -254,7 +254,7 @@ public class TestHttp11Processor extends TomcatBaseTest {
 
         String request = "POST /echo-params.jsp HTTP/1.1" + SimpleHttpClient.CRLF + "Host: any" +
                 SimpleHttpClient.CRLF + "Transfer-encoding: unsupported" + SimpleHttpClient.CRLF + "Content-Length: 9" +
-                SimpleHttpClient.CRLF + "Content-Type: application/x-www-form-urlencoded" + SimpleHttpClient.CRLF +
+                SimpleHttpClient.CRLF + SimpleHttpClient.HTTP_HEADER_CONTENT_TYPE_FORM_URL_ENCODING +
                 SimpleHttpClient.CRLF + "test=data";
 
         Client client = new Client(getPort());
@@ -1837,7 +1837,7 @@ public class TestHttp11Processor extends TomcatBaseTest {
 
         String request = "POST /test/echo-params.jsp HTTP/1.0" + SimpleHttpClient.CRLF + "Host: any" +
                 SimpleHttpClient.CRLF + "Transfer-encoding: chunked" + SimpleHttpClient.CRLF +
-                "Content-Type: application/x-www-form-urlencoded" + SimpleHttpClient.CRLF + "Connection: close" +
+                SimpleHttpClient.HTTP_HEADER_CONTENT_TYPE_FORM_URL_ENCODING + "Connection: close" +
                 SimpleHttpClient.CRLF + SimpleHttpClient.CRLF + "9" + SimpleHttpClient.CRLF + "test=data" +
                 SimpleHttpClient.CRLF + "0" + SimpleHttpClient.CRLF + SimpleHttpClient.CRLF;
 
@@ -1946,16 +1946,95 @@ public class TestHttp11Processor extends TomcatBaseTest {
         Assert.assertEquals(HttpServletResponse.SC_OK, client.getStatusCode());
     }
 
+    @Test
+    public void testEarlyHintsSendError() throws Exception {
+        Tomcat tomcat = getTomcatInstance();
+
+        // No file system docBase required
+        Context ctx = getProgrammaticRootContext();
+
+        // Add servlet
+        Tomcat.addServlet(ctx, "EarlyHintsServlet", new EarlyHintsServlet(true, null));
+        ctx.addServletMappingDecoded("/ehs", "EarlyHintsServlet");
+
+        tomcat.start();
+
+        String request = "GET /ehs HTTP/1.1" + SimpleHttpClient.CRLF +
+                "Host: localhost:" + getPort() + SimpleHttpClient.CRLF +
+                SimpleHttpClient.CRLF;
+
+        Client client = new Client(tomcat.getConnector().getLocalPort());
+        client.setRequest(new String[] { request });
+
+        client.connect(600000, 600000);
+        client.processRequest(false);
+
+        Assert.assertEquals(103, client.getStatusCode());
+
+        client.readResponse(false);
+        Assert.assertEquals(HttpServletResponse.SC_OK, client.getStatusCode());
+    }
+
+
+    @Test
+    public void testEarlyHintsSendErrorWithMessage() throws Exception {
+        Tomcat tomcat = getTomcatInstance();
+
+        // No file system docBase required
+        Context ctx = getProgrammaticRootContext();
+
+        // Add servlet
+        Tomcat.addServlet(ctx, "EarlyHintsServlet", new EarlyHintsServlet(true, "ignored"));
+        ctx.addServletMappingDecoded("/ehs", "EarlyHintsServlet");
+
+        tomcat.start();
+
+        String request = "GET /ehs HTTP/1.1" + SimpleHttpClient.CRLF +
+                "Host: localhost:" + getPort() + SimpleHttpClient.CRLF +
+                SimpleHttpClient.CRLF;
+
+        Client client = new Client(tomcat.getConnector().getLocalPort());
+        client.setRequest(new String[] { request });
+
+        client.connect(600000, 600000);
+        client.processRequest(false);
+
+        Assert.assertEquals(103, client.getStatusCode());
+
+        client.readResponse(false);
+        Assert.assertEquals(HttpServletResponse.SC_OK, client.getStatusCode());
+    }
+
+
 
     private static class EarlyHintsServlet extends HttpServlet {
 
         private static final long serialVersionUID = 1L;
 
+        private final boolean useSendError;
+        private final String errorString;
+
+        EarlyHintsServlet() {
+            this(false, null);
+        }
+
+        EarlyHintsServlet(boolean useSendError, String errorString) {
+            this.useSendError = useSendError;
+            this.errorString = errorString;
+        }
         @Override
         protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
             resp.addHeader("Link", "</style.css>; rel=preload; as=style");
 
-            ((ResponseFacade) resp).sendEarlyHints();
+            if (useSendError) {
+                if (null == errorString) {
+                    resp.sendError(103);
+                } else {
+                    resp.sendError(103, errorString);
+                }
+            } else {
+                ((ResponseFacade) resp).sendEarlyHints();
+            }
 
             resp.setCharacterEncoding(StandardCharsets.UTF_8);
             resp.setContentType("text/plain");
