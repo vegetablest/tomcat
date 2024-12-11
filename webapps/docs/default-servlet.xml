@@ -191,10 +191,6 @@ Tomcat.</p>
         file size in KiB for which sendfile will be used. Use a negative value
         to always disable sendfile. [48]
   </property>
-  <property name="useAcceptRanges">
-        If true, the Accept-Ranges header will be set when appropriate for the
-        response. [true]
-  </property>
   <property name="showServerInfo">
         Should server information be presented in the response sent to clients
         when directory listing is enabled. [true]
