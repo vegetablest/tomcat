@@ -84,8 +84,13 @@ java.net.preferIPv4Stack=false
 # MacOS requires non-default settings to test FFM with OpenSSL. Eg:
 #openssl.ffm.1=-Dorg.apache.tomcat.util.openssl.USE_SYSTEM_LOAD_LIBRARY=true
 #openssl.ffm.2=-Dorg.apache.tomcat.util.openssl.LIBRARY_NAME=ssl
+# Allows loading the crypto library using the JVM and the given name
+# if using org.apache.tomcat.util.openssl.USE_SYSTEM_LOAD_LIBRARY
+# (otherwise it is loaded later by ssl)
+#openssl.ffm.3=-Dorg.apache.tomcat.util.openssl.CRYPTO_LIBRARY_NAME=crypto
 openssl.ffm.1=-DNoop1
 openssl.ffm.2=-DNoop2
+openssl.ffm.3=-DNoop3
 
 
 # ----- Release build settings -----
@@ -132,15 +137,15 @@ base-maven.loc=https://repo.maven.apache.org/maven2
 # ----- Eclipse JDT, version 4.7 or later -----#
 # See https://cwiki.apache.org/confluence/display/TOMCAT/Managing+Tomcat%27s+Dependency+on+the+Eclipse+JDT+Core+Batch+Compiler
 #
-# Checksum is from "SHA512 Checksums for 4.33" link at
-# https://download.eclipse.org/eclipse/downloads/drops4/R-4.33-202409030240/
-# https://download.eclipse.org/eclipse/downloads/drops4/R-4.33-202409030240/checksum/eclipse-4.33-SUMSSHA512
+# Checksum is from "SHA512 Checksums for 4.34" link at
+# https://download.eclipse.org/eclipse/downloads/drops4/R-4.34-202411201800/
+# https://download.eclipse.org/eclipse/downloads/drops4/R-4.34-202411201800/checksum/eclipse-4.34-SUMSSHA512
 #
-jdt.version=4.33
-jdt.release=R-4.33-202409030240
+jdt.version=4.34
+jdt.release=R-4.34-202411201800
 jdt.checksum.enabled=true
 jdt.checksum.algorithm=SHA-512
-jdt.checksum.value=8b99bf69dc13a8b58a5507818be9222887f33b7120f4e92bcae89af108d38b9412715f6fe749eec0c07fc9bde9d84e5f8deacd74030559fab22f14697c12a1a9
+jdt.checksum.value=096c8063097f4aae0ce678200884c70e92773f748a852a20c92d808425ef8fe8d7bd57a5b4ce868a3ec1c71abeaaf92a92871e62e53041d48fc7e86483ecd8ee
 jdt.home=${base.path}/ecj-${jdt.version}
 jdt.jar=${jdt.home}/ecj-${jdt.version}.jar
 # The download will be moved to the archive area eventually. We are taking care of that in advance.
@@ -226,10 +231,10 @@ hamcrest.jar=${hamcrest.home}/hamcrest-${hamcrest.version}.jar
 hamcrest.loc=${base-maven.loc}/org/hamcrest/hamcrest/${hamcrest.version}/hamcrest-${hamcrest.version}.jar
 
 # ----- EasyMock, version 5.0.0 or later -----
-easymock.version=5.4.0
+easymock.version=5.5.0
 easymock.checksum.enabled=true
 easymock.checksum.algorithm=MD5|SHA-1
-easymock.checksum.value=e2f62d08abbadc33c22d580c78af440b|eb56bad81c203765f4a5c74aed28142fb0d79354
+easymock.checksum.value=f1f7e94f70903b0c37a65dd2a011e31a|b07e2bcbc7b6bcae190a18b9ced742b6fd9ceec3
 easymock.home=${base.path}/easymock-${easymock.version}
 easymock.jar=${easymock.home}/easymock-${easymock.version}.jar
 easymock.loc=${base-maven.loc}/org/easymock/easymock/${easymock.version}/easymock-${easymock.version}.jar
@@ -244,10 +249,10 @@ objenesis.jar=${objenesis.home}/objenesis-${objenesis.version}.jar
 objenesis.loc=${base-maven.loc}/org/objenesis/objenesis/${objenesis.version}/objenesis-${objenesis.version}.jar
 
 # ----- byte-buddy, used by EasyMock, version 1.12.18 or later -----
-bytebuddy.version=1.15.4
+bytebuddy.version=1.15.10
 bytebuddy.checksum.enabled=true
 bytebuddy.checksum.algorithm=MD5|SHA-1
-bytebuddy.checksum.value=eee284717781f391c48e7c87644480a4|e8bd42992701720649765383ff570f415190b83f
+bytebuddy.checksum.value=0b029979f5bf509510f91c1a49fd4adb|635c873fadd853c084f84fdc3cbd58c5dd8537f9
 bytebuddy.home=${base.path}/byte-buddy-${bytebuddy.version}
 bytebuddy.jar=${bytebuddy.home}/byte-buddy-${bytebuddy.version}.jar
 bytebuddy.loc=${base-maven.loc}/net/bytebuddy/byte-buddy/${bytebuddy.version}/byte-buddy-${bytebuddy.version}.jar
@@ -262,10 +267,10 @@ unboundid.jar=${unboundid.home}/unboundid-ldapsdk-${unboundid.version}.jar
 unboundid.loc=${base-maven.loc}/com/unboundid/unboundid-ldapsdk/${unboundid.version}/unboundid-ldapsdk-${unboundid.version}.jar
 
 # ----- Checkstyle, version 6.16 or later -----
-checkstyle.version=10.18.2
+checkstyle.version=10.20.2
 checkstyle.checksum.enabled=true
 checkstyle.checksum.algorithm=SHA-512
-checkstyle.checksum.value=9c2be68e423fbbc301272c4a96824f84b8ccae23103e9653af3cea8546bc87695f17491a95daf66c19bfb1597cc3113e2656a5eb8256b0f5468d3cef56cc0e66
+checkstyle.checksum.value=e7de3f1745b3dcd0b56993f30f01453bf4d44935cacc83863cd84c94453fdf7486dbd1610bd95e9aa8083104b06af69416cfb7f39ca5b8112cb17fa36028e279
 checkstyle.home=${base.path}/checkstyle-${checkstyle.version}
 checkstyle.jar=${checkstyle.home}/checkstyle-${checkstyle.version}-all.jar
 checkstyle.loc=${base-gh.loc}/checkstyle/checkstyle/releases/download/checkstyle-${checkstyle.version}/checkstyle-${checkstyle.version}-all.jar
@@ -290,10 +295,10 @@ spotbugs.loc=${base-maven.loc}/com/github/spotbugs/spotbugs/${spotbugs.version}/
 
 # ----- bnd, version 6.3.0 or later  -----
 # ----- provides OSGI metadata for JARs       -----
-bnd.version=7.0.0
+bnd.version=7.1.0
 bnd.checksum.enabled=true
 bnd.checksum.algorithm=MD5|SHA-1
-bnd.checksum.value=654776477ed942fc53f581fec66e253a|9937f6b7528628964a4ab8e50ba6b964d0310bce
+bnd.checksum.value=9cee533d5f3973d6135e557934160180|49e4ebe633c608c498cbfc7d7a4e9dda5fefa2fc
 
 bnd.home=${base.path}/bnd-${bnd.version}
 bnd.jar=${bnd.home}/biz.aQute.bnd-${bnd.version}.jar
