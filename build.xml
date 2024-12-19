@@ -631,7 +631,6 @@
     <exclude name="org/apache/catalina/valves/ExtendedAccessLogValve*" />
     <exclude name="org/apache/catalina/valves/ExtendedAccessLogValve*" />
     <exclude name="org/apache/catalina/valves/HealthCheckValve*" />
-    <exclude name="org/apache/catalina/valves/JDBCAccessLogValve*" />
     <exclude name="org/apache/catalina/valves/LoadBalancerDrainingValve*" />
     <exclude name="org/apache/catalina/valves/PersistentValve*" />
 
@@ -1670,15 +1669,6 @@
       </fileset>
     </txt2html>
 
-    <txt2html todir="${tomcat.build}/webapps/examples/jsp/cal">
-      <fileset dir="webapps/examples/WEB-INF/classes/cal">
-        <include name="Entries.java"/>
-        <include name="Entry.java"/>
-        <include name="JspCalendar.java"/>
-        <include name="TableBean.java"/>
-      </fileset>
-    </txt2html>
-
     <txt2html todir="${tomcat.build}/webapps/examples/jsp/jsptoserv">
       <fileset dir="webapps/examples/WEB-INF/classes">
         <include name="ServletToJsp.java"/>
@@ -2069,6 +2059,7 @@
           <!-- These are managed as jvmargs rather than sysproperty because the default varies by OS -->
           <jvmarg value="${openssl.ffm.1}" />
           <jvmarg value="${openssl.ffm.2}" />
+          <jvmarg value="${openssl.ffm.3}" />
 
           <classpath refid="tomcat.test.classpath" />
 
@@ -3156,6 +3147,7 @@ Configured for ${release.asfusername} to release Tomcat ${version.major}.${versi
       <include name="bin/*.sh" />
       <include name=".travis/*.sh" />
       <include name="res/graal/*.sh" />
+      <include name="res/openssl/*.sh" />
     </fixcrlf>
 
     <!-- Reproducible builds: consistent timestamps for distributed files -->
