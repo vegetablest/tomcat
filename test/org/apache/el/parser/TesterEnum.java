@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,39 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cal;
+package org.apache.el.parser;
 
-public class Entry {
-
-    final String hour;
-    String description;
-
-    public Entry(String hour) {
-        this.hour = hour;
-        this.description = "";
-
-    }
-
-    public String getHour() {
-        return this.hour;
-    }
-
-    public String getColor() {
-        if (description.equals("")) {
-            return "lightblue";
-        }
-        return "red";
-    }
-
-    public String getDescription() {
-        if (description.equals("")) {
-            return "None";
-        }
-        return this.description;
-    }
-
-    public void setDescription(String descr) {
-        description = descr;
-    }
-
+public enum TesterEnum {
+    ONE,
+    TWO,
+    THREE
 }
