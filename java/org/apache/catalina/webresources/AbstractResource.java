@@ -128,6 +128,14 @@ public abstract class AbstractResource implements WebResource {
 
     @Override
     public final String getMimeType() {
+        if (mimeType == null) {
+            String name = getName();
+            int extensionStart = name.lastIndexOf('.');
+            if (extensionStart > -1) {
+                String extension = name.substring(extensionStart + 1);
+                mimeType = root.getContext().findMimeMapping(extension);
+            }
+        }
         return mimeType;
     }
 
