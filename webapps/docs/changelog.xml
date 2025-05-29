@@ -109,7 +109,7 @@
     <changelog>
       <scode>
         This release contains all of the changes up to and including those in
-        Apache Tomcat 11.0.6 plus the additional changes listed below. (markt)
+        Apache Tomcat 11.0.7 plus the additional changes listed below. (markt)
       </scode>
       <update>
         The minimum Java version has been updated to Java 21. (markt)
@@ -159,36 +159,30 @@
         or an include) for a static resource using the POST method will be
         rejected by default. (markt)
       </update>
+      <scode>
+        Calls to <code>HttpServletRequest.getContextPath()</code> now return the
+        canonical context path for the web application rather than the component
+        of the request URI presented by the user agent that maps to the context
+        path. (markt)
+      </scode>
       <!-- Entries for backport and removal before 12.0.0-M1 below this line -->
       <fix>
-        Process possible path parameters rewrite production in the rewrite
-        valve. (remm)
+        Add support for the <code>java:module</code> namespace which mirrors
+        the <code>java:comp</code> namespace. (markt)
       </fix>
-      <add>
-        <bug>69588</bug>: Enable <code>allowLinking</code> to be set on
-        <code>PreResources</code>, <code>JarResources</code> and
-        <code>PostResources</code>. If not set explicitly, the setting will be
-        inherited from the <code>Resources</code>. (markt)
-      </add>
       <fix>
-        <bug>69633</bug>: Add support for Filters using context root mappings.
+        <bug>69690</bug>: Calling <code>HttpServletRequest.getParameter()</code>
+        and related methods for a request with content type
+        <code>multipart/form-data</code> when the mapped servlet does not have a
+        <code>@MultipartConfig</code> or equivalent should not trigger an
+        exception. Note that calling <code>getPart()</code> or
+        <code>getParts()</code> is these circumstances will trigger an
+        exception. (markt)
+      </fix>
+      <fix>
+        Support parsing of multiple path parameters separated by <code>;</code>
+        in a single URL segment. Based on pull request <pr>860</pr> by Chenjp.
         (markt)
-      </fix>
-      <fix>
-        <bug>69643</bug>: Optimize directory listing for large amount of files.
-        Patch submitted by  Loic de l'Eprevier. (remm)
-      </fix>
-      <fix>
-        <pr>843</pr>: Fix off by one validation logic for partial PUT ranges
-        and associated test case. Submitted by Chenjp. (remm)
-      </fix>
-      <scode>
-        Refactor GCI servlet to access resources via the
-        <code>WebResource</code> API. (markt)
-      </scode>
-      <fix>
-        <bug>69662</bug>: Report name in exception message when a naming lookup
-        failure occurs. Based on code submitted by Donald Smith. (remm)
       </fix>
     </changelog>
   </subsection>
@@ -204,7 +198,17 @@
         <code>certificateKeystorePassword</code> attribute of a certificate.
         (remm)
       </update>
+      <update>
+        Remove NIO2 connector. (remm)
+      </update>
       <!-- Entries for backport and removal before 12.0.0-M1 below this line -->
+      <scode>
+        <pr>861</pr>: Refactor <code>TaskQueue</code> to use the new interface
+        <code>RetryableQueue</code> which enables better integration of custom
+        <code>Executor</code>s which provide their own
+        <code>BlockingQueue</code> implementation. Pull request provided by
+        Paulo Almeida. (markt)
+      </scode>
     </changelog>
   </subsection>
   <subsection name="Jasper">
@@ -214,8 +218,8 @@
         (<code>??</code>) operators in Jakarta Expression language. (markt)
       </add>
       <add>
-        Extend the existing <code>+</code> operator in Jakarta Expression
-        Language to support mergin <code>Map</code>Map and <code>Set</code>Set
+        Extend the existing <code>+=</code> operator in Jakarta Expression
+        Language to support merging <code>Map</code>Map and <code>Set</code>Set
         and concatenating <code>List</code>s. (markt)
       </add>
       <update>
@@ -223,20 +227,16 @@
         <code>compilerTargetVM</code> have been updated to 21 to align with Java
         21 being the minimum Java version required for Tomcat 12. (markt)
       </update>
+      <scode>
+        Refactor the performance optimisation for
+        <code>jakarta.servlet.jsp.el.ImportELResolver</code> to use the new
+        marker class,
+        <code>jakarta.el.ELResolver.StandaloneIdentifierMarker</code>. (markt)
+      </scode>
       <!-- Entries for backport and removal before 12.0.0-M1 below this line -->
       <fix>
-        <bug>69635</bug>: Add support to <code>jakarta.el.ImportHandler</code>
-        for resolving inner classes. (markt)
-      </fix>
-      <add>
-        Add support for optimized execution of c:set and c:remove tags, when
-        activated via JSP servlet param useNonstandardTagOptimizations.
-        (jengebr)
-      </add>
-      <fix>
-        Fix an edge case compilation bug for JSP and tag files on case
-        insensitive file systems that was exposed by the test case for
-        <bug>69635</bug>. (markt)
+        <bug>69696</bug>: Mark the JSP wrapper for reload after a failed
+        compilation. (remm)
       </fix>
     </changelog>
   </subsection>
@@ -258,9 +258,8 @@
     <changelog>
       <!-- Entries for backport and removal before 12.0.0-M1 below this line -->
       <fix>
-        <bug>68876</bug>: Documentation. Update the UML diagrams for server
-        start-up, request processing and authentication using PlantUML and
-        include the source files for each diagram. (markt)
+        <bug>69694</bug>: Improve error reporting of deployment tasks done
+        using the manager webapp when a copy operation fails. (remm)
       </fix>
     </changelog>
   </subsection>
@@ -271,17 +270,7 @@
       </update>
       <!-- Entries for backport and removal before 12.0.0-M1 below this line -->
       <update>
-        Update Jacoco to 0.8.13. (remm)
-      </update>
-      <update>
-        Update Byte Buddy to 1.17.5. (markt)
-      </update>
-      <update>
-        Update Checkstyle to 10.23.1. (markt)
-      </update>
-      <update>
-        Update file extension to media type mappings to align with the current
-        list used by the Apache Web Server (httpd). (markt)
+        Update Tomcat Native to 2.0.9. (markt)
       </update>
     </changelog>
   </subsection>
