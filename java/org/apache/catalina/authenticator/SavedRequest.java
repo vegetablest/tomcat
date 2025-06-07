@@ -183,13 +183,13 @@ public final class SavedRequest implements Serializable {
     /**
      * The original maxInactiveInterval for the session.
      */
-    private int originalMaxInactiveInterval = -1;
+    private Integer originalMaxInactiveInterval = null;
 
-    public int getOriginalMaxInactiveInterval() {
+    public Integer getOriginalMaxInactiveIntervalOptional() {
         return originalMaxInactiveInterval;
     }
 
     public void setOriginalMaxInactiveInterval(int originalMaxInactiveInterval) {
-        this.originalMaxInactiveInterval = originalMaxInactiveInterval;
+        this.originalMaxInactiveInterval = Integer.valueOf(originalMaxInactiveInterval);
     }
 }
