@@ -14,28 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tomcat.util.net.openssl;
+package org.apache.catalina.valves;
 
-import java.util.List;
-import java.util.Map;
+import org.junit.Test;
 
-import javax.net.ssl.SSLSession;
+public class TestParameterLimitValveConfig {
 
-import org.apache.tomcat.util.net.SSLHostConfigCertificate;
-import org.apache.tomcat.util.net.SSLImplementation;
-import org.apache.tomcat.util.net.SSLSupport;
-import org.apache.tomcat.util.net.SSLUtil;
-import org.apache.tomcat.util.net.jsse.JSSESupport;
-
-public class OpenSSLImplementation extends SSLImplementation {
-
-    @Override
-    public SSLSupport getSSLSupport(SSLSession session, Map<String,List<String>> additionalAttributes) {
-        return new JSSESupport(session, additionalAttributes);
+    @Test(expected = IllegalArgumentException.class)
+    public void testNoEquals() {
+        ParameterLimitValve parameterLimitValve = new ParameterLimitValve();
+        parameterLimitValve.setUrlPatternLimits("/abc");
     }
 
-    @Override
-    public SSLUtil getSSLUtil(SSLHostConfigCertificate certificate) {
-        return new OpenSSLUtil(certificate);
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidLimitCount02() {
+        ParameterLimitValve parameterLimitValve = new ParameterLimitValve();
+        parameterLimitValve.setUrlPatternLimits("/abc=1,2");
+
+    }
+
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidLimitCount04() {
+        ParameterLimitValve parameterLimitValve = new ParameterLimitValve();
+        parameterLimitValve.setUrlPatternLimits("/abc=1,2,3,4");
+
     }
 }

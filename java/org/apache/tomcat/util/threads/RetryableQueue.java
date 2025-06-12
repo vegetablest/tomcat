@@ -14,28 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.tomcat.util.net.openssl;
 
-import java.util.List;
-import java.util.Map;
+package org.apache.tomcat.util.threads;
 
-import javax.net.ssl.SSLSession;
+import java.util.concurrent.BlockingQueue;
 
-import org.apache.tomcat.util.net.SSLHostConfigCertificate;
-import org.apache.tomcat.util.net.SSLImplementation;
-import org.apache.tomcat.util.net.SSLSupport;
-import org.apache.tomcat.util.net.SSLUtil;
-import org.apache.tomcat.util.net.jsse.JSSESupport;
+public interface RetryableQueue<T> extends BlockingQueue<T> {
 
-public class OpenSSLImplementation extends SSLImplementation {
-
-    @Override
-    public SSLSupport getSSLSupport(SSLSession session, Map<String,List<String>> additionalAttributes) {
-        return new JSSESupport(session, additionalAttributes);
-    }
-
-    @Override
-    public SSLUtil getSSLUtil(SSLHostConfigCertificate certificate) {
-        return new OpenSSLUtil(certificate);
-    }
+    /**
+     * Used to add a task to the queue if the task has been rejected by the Executor.
+     *
+     * @param o         The task to add to the queue
+     *
+     * @return          {@code true} if the task was added to the queue,
+     *                      otherwise {@code false}
+     */
+    boolean force(T o);
 }

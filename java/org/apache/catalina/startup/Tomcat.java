@@ -876,10 +876,10 @@ public class Tomcat {
 
 
     /**
-     * By default, when calling addWebapp() to create a Context, the settings from the default web.xml are added to
-     * the context. Calling this method with a <code>false</code> value prior to calling addWebapp() allows to opt out
-     * of the default settings. In that event you will need to add the configurations yourself, either programmatically
-     * or by using web.xml deployment descriptors.
+     * By default, when calling addWebapp() to create a Context, the settings from the default web.xml are added to the
+     * context. Calling this method with a <code>false</code> value prior to calling addWebapp() allows to opt out of
+     * the default settings. In that event you will need to add the configurations yourself, either programmatically or
+     * by using web.xml deployment descriptors.
      *
      * @param addDefaultWebXmlToWebapp <code>false</code> will prevent the class from automatically adding the default
      *                                     settings when calling addWebapp(). <code>true</code> will add the default
@@ -992,7 +992,6 @@ public class Tomcat {
      * <li>MIME mappings (subset of those in conf/web.xml)</li>
      * <li>Welcome files</li>
      * </ul>
-     * TODO: Align the MIME mappings with conf/web.xml - possibly via a common file.
      *
      * @param contextPath The path of the context to set the defaults for
      */
@@ -1034,11 +1033,15 @@ public class Tomcat {
         ctx.addWelcomeFile("index.html");
         ctx.addWelcomeFile("index.htm");
         ctx.addWelcomeFile("index.jsp");
+        // Any application configured welcome files should override the defaults.
+        if (ctx instanceof StandardContext stdCtx) {
+            stdCtx.setReplaceWelcomeFiles(true);
+        }
     }
 
 
     /**
-     * Add the default MIME type mappings to the provide Context.
+     * Add the default MIME type mappings to the provided Context.
      *
      * @param context The web application to which the default MIME type mappings should be added.
      */
@@ -1193,7 +1196,7 @@ public class Tomcat {
         // Graal native images don't load any configuration except the VM default
         if (JreCompat.isGraalAvailable()) {
             try (InputStream is = new FileInputStream(
-                System.getProperty("java.util.logging.config.file", "conf/logging.properties"))) {
+                    System.getProperty("java.util.logging.config.file", "conf/logging.properties"))) {
                 LogManager.getLogManager().readConfiguration(is);
             } catch (SecurityException | IOException e) {
                 // Ignore, the VM default will be used
