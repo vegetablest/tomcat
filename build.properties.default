@@ -7,7 +7,9 @@
 # the License.  You may obtain a copy of the License at
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
-## distributed under the License is distributed on an "AS IS" BASIS,
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
@@ -67,7 +69,6 @@ javadoc.locale=en
 
 # ----- Test configuration -----
 execute.test.nio=true
-execute.test.nio2=true
 # Stop testing if a failure occurs
 test.haltonfailure=false
 # Activate AccessLog during testing
@@ -139,15 +140,15 @@ base-maven.loc=https://repo.maven.apache.org/maven2
 # ----- Eclipse JDT, version 4.7 or later -----#
 # See https://cwiki.apache.org/confluence/display/TOMCAT/Managing+Tomcat%27s+Dependency+on+the+Eclipse+JDT+Core+Batch+Compiler
 #
-# Checksum is from "SHA512 Checksums for 4.35" link at
-# https://download.eclipse.org/eclipse/downloads/drops4/R-4.35-202502280140/
-# https://download.eclipse.org/eclipse/downloads/drops4/R-4.35-202502280140/checksum/eclipse-4.35-SUMSSHA512
+# Checksum is from "SHA512 Checksums for 4.36" link at
+# https://download.eclipse.org/eclipse/downloads/drops4/R-4.36-202505281830/
+# https://download.eclipse.org/eclipse/downloads/drops4/R-4.36-202505281830/checksum/eclipse-4.36-SUMSSHA512
 #
-jdt.version=4.35
-jdt.release=R-4.35-202502280140
+jdt.version=4.36
+jdt.release=R-4.36-202505281830
 jdt.checksum.enabled=true
 jdt.checksum.algorithm=SHA-512
-jdt.checksum.value=f79cadd22cc0b2c9ce8d7cd168280b98835caa24dd6b8c14aab06ce67fe2048c161c6f4b38df686783e64aeb4953cbb0886fea6e3abffad99aa62f1aa80e6d40
+jdt.checksum.value=4f0da140e5c447717e5111bd4bf6e6e9a4431f1db2c67deaf37b13f4ec0f6314d8d799a8a3da19859028c5ff6bcf32ac417228697941c590ce3f0f89ab3a30fc
 jdt.home=${base.path}/ecj-${jdt.version}
 jdt.jar=${jdt.home}/ecj-${jdt.version}.jar
 # The download will be moved to the archive area eventually. We are taking care of that in advance.
@@ -155,14 +156,14 @@ jdt.loc.1=https://archive.eclipse.org/eclipse/downloads/drops4/${jdt.release}/ec
 jdt.loc.2=https://download.eclipse.org/eclipse/downloads/drops4/${jdt.release}/ecj-${jdt.version}.jar
 
 # ----- Tomcat native library -----
-tomcat-native.version=2.0.8
-tomcat-native-openssl.version=3.0.14
+tomcat-native.version=2.0.9
+tomcat-native-openssl.version=3.5.0
 tomcat-native.src.checksum.enabled=true
 tomcat-native.src.checksum.algorithm=SHA-512
-tomcat-native.src.checksum.value=fd45533b9c34b008717d18ed49334c7286b93c849c487c1c42746f2998cc4a6ff0362e536a8b5124c6539847a92a9f7631c7638a21cd5d22134fe1a9bb0f0702
+tomcat-native.src.checksum.value=c8eb81de1cf7316174c36038c2133b013fd18ba11df09c41edb927ff33fef46863ef706b6193487ecde1eed7055d4c47fa23fc29d5a8d53f0c4b6d69b0ce9b33
 tomcat-native.win.checksum.enabled=true
 tomcat-native.win.checksum.algorithm=SHA-512
-tomcat-native.win.checksum.value=a4a8816668f14a7461711e25cb9277534981936c9e6f8b00ae55084cb265dc1d89ad07fa508ae2e1f7832236dafafbdd9d76a313c87f34e00ecfdfe75776638a
+tomcat-native.win.checksum.value=8e8a580425671025913259659b61c497354d682735481663730e800c8f8b4d16d3322d9c75037146f901af22341a903fa9700d18d8d2cd874745a18563cde0d5
 tomcat-native.home=${base.path}/tomcat-native-${tomcat-native.version}
 tomcat-native.tar.gz=${tomcat-native.home}/tomcat-native.tar.gz
 tomcat-native.loc.1=${base-tomcat.loc.1}/tomcat-connectors/native/${tomcat-native.version}/source/tomcat-native-${tomcat-native.version}-src.tar.gz
@@ -231,10 +232,10 @@ hamcrest.jar=${hamcrest.home}/hamcrest-${hamcrest.version}.jar
 hamcrest.loc=${base-maven.loc}/org/hamcrest/hamcrest/${hamcrest.version}/hamcrest-${hamcrest.version}.jar
 
 # ----- EasyMock, version 5.0.0 or later -----
-easymock.version=5.5.0
+easymock.version=5.6.0
 easymock.checksum.enabled=true
 easymock.checksum.algorithm=MD5|SHA-1
-easymock.checksum.value=f1f7e94f70903b0c37a65dd2a011e31a|b07e2bcbc7b6bcae190a18b9ced742b6fd9ceec3
+easymock.checksum.value=2be7351f227b2022faf4230ceb576e0a|f8e15a47aac9838ee36be6c3eddc50bb78a06191
 easymock.home=${base.path}/easymock-${easymock.version}
 easymock.jar=${easymock.home}/easymock-${easymock.version}.jar
 easymock.loc=${base-maven.loc}/org/easymock/easymock/${easymock.version}/easymock-${easymock.version}.jar
@@ -258,19 +259,19 @@ bytebuddy.jar=${bytebuddy.home}/byte-buddy-${bytebuddy.version}.jar
 bytebuddy.loc=${base-maven.loc}/net/bytebuddy/byte-buddy/${bytebuddy.version}/byte-buddy-${bytebuddy.version}.jar
 
 # ----- UnboundID, used by unit tests, version 5.1.4 or later -----
-unboundid.version=7.0.2
+unboundid.version=7.0.3
 unboundid.checksum.enabled=true
 unboundid.checksum.algorithm=SHA-512
-unboundid.checksum.value=425a003273c8fb3ddcefae8273b322dae2186ccb48344c55e8a4a8251915ef0c595cd69566c3ef33476c3151bcd5b20a3492b2917c4959a83e30ca363cbce88e
+unboundid.checksum.value=25fef7f28e06bedfa54672370e0e4cfb5ef8041f1bd5abf2826ad022e5131bf1d3791314888a939f3fe25edbc28d28afffdd7125cfae16876ead0bf50c68351a
 unboundid.home=${base.path}/unboundid-${unboundid.version}
 unboundid.jar=${unboundid.home}/unboundid-ldapsdk-${unboundid.version}.jar
 unboundid.loc=${base-maven.loc}/com/unboundid/unboundid-ldapsdk/${unboundid.version}/unboundid-ldapsdk-${unboundid.version}.jar
 
 # ----- Checkstyle, version 6.16 or later -----
-checkstyle.version=10.23.1
+checkstyle.version=10.25.1
 checkstyle.checksum.enabled=true
 checkstyle.checksum.algorithm=SHA-512
-checkstyle.checksum.value=bd73ff6271d970fe4d13cc4d1410c9b305c908fb17fa6dae898fbd3ec359acd93417d8e2ea4aa17bddfa125ebc89d7fe743ec81072cea0691be35dc21e5e4b27
+checkstyle.checksum.value=84858b0bdddce9c1b3f55e0fb305214547bedaa45e6f60a38ca9d031af600d2dfc24f8fc1e21b9dbc9cb9a4c88c7a5853025d36dc38c447001a3fa0a79986e3e
 checkstyle.home=${base.path}/checkstyle-${checkstyle.version}
 checkstyle.jar=${checkstyle.home}/checkstyle-${checkstyle.version}-all.jar
 checkstyle.loc=${base-gh.loc}/checkstyle/checkstyle/releases/download/checkstyle-${checkstyle.version}/checkstyle-${checkstyle.version}-all.jar

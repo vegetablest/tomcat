@@ -71,9 +71,13 @@ public abstract class AbstractResourceSet extends LifecycleBase implements WebRe
 
     public final void setWebAppMount(String webAppMount) {
         checkPath(webAppMount);
-        // Optimise internal processing
-        if (webAppMount.equals("/")) {
-            this.webAppMount = "";
+        /*
+         * Originally, only "/" was changed to "" to allow some optimisations. The fix for CVE-2025-49125 means that
+         * mounted WebResourceSets will break if webAppMount ends in '/'. So now the trailing "/" is removed in all
+         * cases.
+         */
+        if (webAppMount.endsWith("/")) {
+            this.webAppMount = webAppMount.substring(0, webAppMount.length() - 1);
         } else {
             this.webAppMount = webAppMount;
         }
@@ -82,6 +86,18 @@ public abstract class AbstractResourceSet extends LifecycleBase implements WebRe
     protected final String getWebAppMount() {
         return webAppMount;
     }
+
+    protected boolean isPathMounted(String path, String webAppMount) {
+        // Doesn't call getWebAppMount() as value might have changed
+        if (path.startsWith(webAppMount)) {
+            if (path.length() != webAppMount.length() && path.charAt(webAppMount.length()) != '/') {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
 
     public final void setBase(String base) {
         this.base = base;

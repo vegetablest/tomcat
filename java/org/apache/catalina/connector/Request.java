@@ -97,10 +97,8 @@ import org.apache.tomcat.util.ExceptionUtils;
 import org.apache.tomcat.util.buf.B2CConverter;
 import org.apache.tomcat.util.buf.ByteChunk;
 import org.apache.tomcat.util.buf.CharsetHolder;
-import org.apache.tomcat.util.buf.EncodedSolidusHandling;
 import org.apache.tomcat.util.buf.MessageBytes;
 import org.apache.tomcat.util.buf.StringUtils;
-import org.apache.tomcat.util.buf.UDecoder;
 import org.apache.tomcat.util.http.CookieProcessor;
 import org.apache.tomcat.util.http.FastHttpDateFormat;
 import org.apache.tomcat.util.http.InvalidParameterException;
@@ -147,7 +145,9 @@ public class Request implements HttpServletRequest {
     public Request(Connector connector, org.apache.coyote.Request coyoteRequest) {
         this.connector = connector;
         if (connector != null) {
-            this.maxParameterCount = connector.getMaxParameterCount();
+            maxParameterCount = connector.getMaxParameterCount();
+            maxPartCount = connector.getMaxPartCount();
+            maxPartHeaderSize = connector.getMaxPartHeaderSize();
         }
         this.coyoteRequest = coyoteRequest;
         inputBuffer = new InputBuffer(coyoteRequest);
@@ -420,6 +420,10 @@ public class Request implements HttpServletRequest {
      */
     private int maxParameterCount = -1;
 
+    private int maxPartCount = -1;
+
+    private int maxPartHeaderSize = -1;
+
     // --------------------------------------------------------- Public Methods
 
     public void addPathParameter(String name, String value) {
@@ -451,8 +455,12 @@ public class Request implements HttpServletRequest {
         parametersParsed = false;
         if (connector != null) {
             maxParameterCount = connector.getMaxParameterCount();
+            maxPartCount = connector.getMaxPartCount();
+            maxPartHeaderSize = connector.getMaxPartHeaderSize();
         } else {
             maxParameterCount = -1;
+            maxPartCount = -1;
+            maxPartHeaderSize = -1;
         }
         if (parts != null) {
             for (Part part : parts) {
@@ -519,7 +527,7 @@ public class Request implements HttpServletRequest {
     }
 
 
-    protected void recycleSessionInfo() {
+    public void recycleSessionInfo() {
         if (session != null) {
             try {
                 session.endAccess();
@@ -842,14 +850,36 @@ public class Request implements HttpServletRequest {
         coyoteRequest.setServerPort(port);
     }
 
+
     /**
-     * Set the maximum number of request parameters (GET plus POST) for a single request
+     * Set the maximum number of request parameters (GET plus POST including multipart) for a single request.
      *
      * @param maxParameterCount The maximum number of request parameters
      */
     public void setMaxParameterCount(int maxParameterCount) {
         this.maxParameterCount = maxParameterCount;
     }
+
+
+    /**
+     * Set the maximum number of parts for a single multipart request.
+     *
+     * @param maxPartCount The maximum number of request parts
+     */
+    public void setMaxPartCount(int maxPartCount) {
+        this.maxPartCount = maxPartCount;
+    }
+
+
+    /**
+     * Set the maximum header size per part for a single multipart request.
+     *
+     * @param maxPartHeaderSize The maximum size of the headers for one part
+     */
+    public void setMaxPartHeaderSize(int maxPartHeaderSize) {
+        this.maxPartHeaderSize = maxPartHeaderSize;
+    }
+
 
     // ------------------------------------------------- ServletRequest Methods
 
@@ -1844,121 +1874,11 @@ public class Request implements HttpServletRequest {
     /**
      * {@inheritDoc}
      * <p>
-     * Tomcat neither normalizes nor decodes the returned value. It will be identical to the part of the request URI
-     * provided by the user agent that was used to determine the context path.
+     * Tomcat returns the canonical context path for the web application.
      */
     @Override
     public String getContextPath() {
-        int lastSlash = mappingData.contextSlashCount;
-        // Special case handling for the root context
-        if (lastSlash == 0) {
-            return "";
-        }
-
-        String canonicalContextPath = getServletContext().getContextPath();
-
-        String uri = getRequestURI();
-        int pos = 0;
-        if (!getContext().getAllowMultipleLeadingForwardSlashInPath()) {
-            // Ensure that the returned value only starts with a single '/'.
-            // This prevents the value being misinterpreted as a protocol-relative
-            // URI if used with sendRedirect().
-            do {
-                pos++;
-            } while (pos < uri.length() && uri.charAt(pos) == '/');
-            pos--;
-            uri = uri.substring(pos);
-        }
-
-        char[] uriChars = uri.toCharArray();
-        // Need at least the number of slashes in the context path
-        while (lastSlash > 0) {
-            pos = nextSlash(uriChars, pos + 1);
-            if (pos == -1) {
-                break;
-            }
-            lastSlash--;
-        }
-        // Now allow for path parameters, normalization and/or encoding.
-        // Essentially, keep extending the candidate path up to the next slash
-        // until the decoded and normalized candidate path (with the path
-        // parameters removed) is the same as the canonical path.
-        String candidate;
-        if (pos == -1) {
-            candidate = uri;
-        } else {
-            candidate = uri.substring(0, pos);
-        }
-        candidate = removePathParameters(candidate);
-        candidate = UDecoder.URLDecode(candidate, connector.getURICharset());
-        candidate = org.apache.tomcat.util.http.RequestUtil.normalize(candidate);
-        boolean match = canonicalContextPath.equals(candidate);
-        while (!match && pos != -1) {
-            pos = nextSlash(uriChars, pos + 1);
-            if (pos == -1) {
-                candidate = uri;
-            } else {
-                candidate = uri.substring(0, pos);
-            }
-            candidate = removePathParameters(candidate);
-            candidate = UDecoder.URLDecode(candidate, connector.getURICharset());
-            candidate = org.apache.tomcat.util.http.RequestUtil.normalize(candidate);
-            match = canonicalContextPath.equals(candidate);
-        }
-        if (match) {
-            if (pos == -1) {
-                return uri;
-            } else {
-                return uri.substring(0, pos);
-            }
-        } else {
-            // Should never happen
-            throw new IllegalStateException(
-                    sm.getString("coyoteRequest.getContextPath.ise", canonicalContextPath, uri));
-        }
-    }
-
-
-    private String removePathParameters(String input) {
-        int nextSemiColon = input.indexOf(';');
-        // Shortcut
-        if (nextSemiColon == -1) {
-            return input;
-        }
-        StringBuilder result = new StringBuilder(input.length());
-        result.append(input, 0, nextSemiColon);
-        while (true) {
-            int nextSlash = input.indexOf('/', nextSemiColon);
-            if (nextSlash == -1) {
-                break;
-            }
-            nextSemiColon = input.indexOf(';', nextSlash);
-            if (nextSemiColon == -1) {
-                result.append(input.substring(nextSlash));
-                break;
-            } else {
-                result.append(input, nextSlash, nextSemiColon);
-            }
-        }
-
-        return result.toString();
-    }
-
-
-    private int nextSlash(char[] uri, int startPos) {
-        int len = uri.length;
-        int pos = startPos;
-        while (pos < len) {
-            if (uri[pos] == '/') {
-                return pos;
-            } else if (connector.getEncodedSolidusHandlingInternal() == EncodedSolidusHandling.DECODE &&
-                    uri[pos] == '%' && pos + 2 < len && uri[pos + 1] == '2' &&
-                    (uri[pos + 2] == 'f' || uri[pos + 2] == 'F')) {
-                return pos;
-            }
-            pos++;
-        }
-        return -1;
+        return getContext().getPath();
     }
 
 
@@ -2410,9 +2330,13 @@ public class Request implements HttpServletRequest {
     @Override
     public Collection<Part> getParts() throws IOException, IllegalStateException, ServletException {
 
-        parseParts();
+        parseParts(true);
 
         if (partsParseException != null) {
+            Context context = getContext();
+            if (context != null && context.getLogger().isDebugEnabled()) {
+                context.getLogger().debug(sm.getString("coyoteRequest.partsParseException", partsParseException.getMessage()));
+            }
             switch (partsParseException) {
                 case IOException ioException -> throw ioException;
                 case IllegalStateException illegalStateException -> throw illegalStateException;
@@ -2426,7 +2350,7 @@ public class Request implements HttpServletRequest {
     }
 
 
-    private void parseParts() {
+    private void parseParts(boolean explicit) {
 
         // Return immediately if the parts have already been parsed
         if (parts != null || partsParseException != null) {
@@ -2441,7 +2365,11 @@ public class Request implements HttpServletRequest {
                 mce = new MultipartConfigElement(null, connector.getMaxPostSize(), connector.getMaxPostSize(),
                         connector.getMaxPostSize());
             } else {
-                partsParseException = new IllegalStateException(sm.getString("coyoteRequest.noMultipartConfig"));
+                if (explicit) {
+                    partsParseException = new IllegalStateException(sm.getString("coyoteRequest.noMultipartConfig"));
+                } else {
+                    parts = Collections.emptyList();
+                }
                 return;
             }
         }
@@ -2490,13 +2418,29 @@ public class Request implements HttpServletRequest {
         upload.setFileItemFactory(factory);
         upload.setFileSizeMax(mce.getMaxFileSize());
         upload.setSizeMax(mce.getMaxRequestSize());
-        if (maxParameterCount > -1) {
-            // There is a limit. The limit for parts needs to be reduced by
-            // the number of parameters we have already parsed.
-            // Must be under the limit else parsing parameters would have
-            // triggered an exception.
-            upload.setFileCountMax(maxParameterCount - parameters.size());
+        upload.setPartHeaderSizeMax(maxPartHeaderSize);
+        /*
+         * There are two independent limits on the number of parts.
+         *
+         * 1. The limit based on parameters. This is maxParameterCount less the number of parameters already processed.
+         *
+         * 2. The limit based on parts. This is maxPartCount.
+         *
+         * The lower of these two limits will be applied to this request.
+         *
+         * Note: Either of both limits may be set to -1 (unlimited).
+         */
+        int partLimit = maxParameterCount;
+        if (partLimit > -1) {
+            partLimit = partLimit - parameters.size();
         }
+        int maxPartCount = this.maxPartCount;
+        if (maxPartCount > -1) {
+            if (partLimit < 0 || partLimit > maxPartCount) {
+                partLimit = maxPartCount;
+            }
+        }
+        upload.setFileCountMax(partLimit);
 
         parts = new ArrayList<>();
         try {
@@ -2767,6 +2711,10 @@ public class Request implements HttpServletRequest {
         doParseParameters();
 
         if (parametersParseException != null) {
+            Context context = getContext();
+            if (context != null && context.getLogger().isDebugEnabled()) {
+                context.getLogger().debug(sm.getString("coyoteRequest.parametersParseException", parametersParseException.getMessage()));
+            }
             throw parametersParseException;
         }
     }
@@ -2806,7 +2754,7 @@ public class Request implements HttpServletRequest {
         String mediaType = MediaType.parseMediaTypeOnly(getContentType());
 
         if ("multipart/form-data".equals(mediaType)) {
-            parseParts();
+            parseParts(false);
             if (partsParseException instanceof IllegalStateException) {
                 parametersParseException = (IllegalStateException) partsParseException;
             } else if (partsParseException != null) {

@@ -35,7 +35,7 @@ public class ImportHandler {
     private static final Map<String,Set<String>> standardPackages = new HashMap<>();
 
     static {
-        // Servlet 6.0
+        // Servlet 6.2
         Set<String> servletClassNames = new HashSet<>();
         // Interfaces
         servletClassNames.add("AsyncContext");
@@ -88,7 +88,7 @@ public class ImportHandler {
         servletClassNames.add("UnavailableException");
         standardPackages.put("jakarta.servlet", servletClassNames);
 
-        // Servlet 6.1
+        // Servlet 6.2
         Set<String> servletHttpClassNames = new HashSet<>();
         // Interfaces
         servletHttpClassNames.add("HttpServletMapping");
@@ -118,7 +118,7 @@ public class ImportHandler {
         servletHttpClassNames.add("MappingMatch");
         standardPackages.put("jakarta.servlet.http", servletHttpClassNames);
 
-        // JSP 3.0
+        // JSP 4.1
         Set<String> servletJspClassNames = new HashSet<>();
         // Interfaces
         servletJspClassNames.add("HttpJspPage");
@@ -138,7 +138,7 @@ public class ImportHandler {
         standardPackages.put("jakarta.servlet.jsp", servletJspClassNames);
 
         Set<String> javaLangClassNames = new HashSet<>();
-        // Based on Java 21 EA29
+        // Based on Java 25 EA16
         // Interfaces
         javaLangClassNames.add("Appendable");
         javaLangClassNames.add("AutoCloseable");
@@ -170,6 +170,7 @@ public class ImportHandler {
         javaLangClassNames.add("Enum");
         javaLangClassNames.add("Enum.EnumDesc");
         javaLangClassNames.add("Float");
+        javaLangClassNames.add("IO");
         javaLangClassNames.add("InheritableThreadLocal");
         javaLangClassNames.add("Integer");
         javaLangClassNames.add("Long");
@@ -192,6 +193,7 @@ public class ImportHandler {
         javaLangClassNames.add("ScopedValue.Carrier");
         javaLangClassNames.add("SecurityManager");
         javaLangClassNames.add("Short");
+        javaLangClassNames.add("StableValue");
         javaLangClassNames.add("StackTraceElement");
         javaLangClassNames.add("StackWalker");
         javaLangClassNames.add("StrictMath");
