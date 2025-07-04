@@ -1074,7 +1074,7 @@ public class DefaultServlet extends HttpServlet {
                     response.setContentType(contentType);
                 }
             }
-            if (resource.isFile() && contentLength >= 0 && (!serveContent || ostream != null)) {
+            if (resource.isFile() && contentLength >= 0 && (!serveContent || ostream != null || writer != null)) {
                 if (debug > 0) {
                     log("DefaultServlet.serveFile:  contentLength=" + contentLength);
                 }
@@ -2000,7 +2000,7 @@ public class DefaultServlet extends HttpServlet {
                     }
                     IOException e = copyRange(reader, new PrintWriter(buffer));
                     if (debug > 10) {
-                        log("readme '" + readmeFile + "' output error: " + e.getMessage());
+                        log("readme '" + readmeFile + "' output error: " + ((e != null) ? e.getMessage() : ""));
                     }
                 } catch (IOException e) {
                     log(sm.getString("defaultServlet.readerCloseFailed"), e);
