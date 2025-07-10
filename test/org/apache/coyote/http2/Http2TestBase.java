@@ -671,6 +671,11 @@ public abstract class Http2TestBase extends TomcatBaseTest {
     }
 
     protected void openClientConnection(boolean tls) throws IOException {
+        openClientConnection(tls, true);
+    }
+
+    protected void openClientConnection(boolean tls, boolean autoAckSettings) throws IOException {
+
         SocketFactory socketFactory = tls ? TesterSupport.configureClientSsl() : SocketFactory.getDefault();
         // Open a connection
         s = socketFactory.createSocket("localhost", getPort());
@@ -680,7 +685,7 @@ public abstract class Http2TestBase extends TomcatBaseTest {
         InputStream is = s.getInputStream();
 
         input = new TestInput(is);
-        output = new TestOutput();
+        output = new TestOutput(autoAckSettings);
         parser = new TesterHttp2Parser("-1", input, output);
         hpackEncoder = new HpackEncoder();
     }
@@ -1065,6 +1070,8 @@ public abstract class Http2TestBase extends TomcatBaseTest {
 
     public class TestOutput implements Output, HeaderEmitter {
 
+        private final boolean autoAckSettings;
+
         private StringBuffer trace = new StringBuffer();
         private String lastStreamId = "0";
         private ConnectionSettingsRemote remoteSettings = new ConnectionSettingsRemote("-1");
@@ -1072,6 +1079,10 @@ public abstract class Http2TestBase extends TomcatBaseTest {
         private ByteBuffer bodyBuffer = null;
         private long bytesRead;
         private volatile HpackDecoder hpackDecoder = null;
+
+        public TestOutput(boolean autoAckSettings) {
+            this.autoAckSettings = autoAckSettings;
+        }
 
         public void setTraceBody(boolean traceBody) {
             this.traceBody = traceBody;
@@ -1092,14 +1103,14 @@ public abstract class Http2TestBase extends TomcatBaseTest {
 
 
         @Override
-        public ByteBuffer startRequestBodyFrame(int streamId, int payloadSize, boolean endOfStream) {
+        public ByteBuffer startRequestBodyFrame(int streamId, int dataLength, boolean endOfStream) {
             lastStreamId = Integer.toString(streamId);
-            bytesRead += payloadSize;
+            bytesRead += dataLength;
             if (traceBody) {
-                bodyBuffer = ByteBuffer.allocate(payloadSize);
+                bodyBuffer = ByteBuffer.allocate(dataLength);
                 return bodyBuffer;
             } else {
-                trace.append(lastStreamId + "-Body-" + payloadSize + "\n");
+                trace.append(lastStreamId + "-Body-" + dataLength + "\n");
                 return null;
             }
         }
@@ -1203,7 +1214,9 @@ public abstract class Http2TestBase extends TomcatBaseTest {
                 trace.append("0-Settings-Ack\n");
             } else {
                 trace.append("0-Settings-End\n");
-                sendSettings(0, true);
+                if (autoAckSettings) {
+                    sendSettings(0, true);
+                }
             }
         }
 
